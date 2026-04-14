@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: products
+    // Fields: name (string), price (number), stock (number), category (string), minStock (number)
+    //
+    // Collection: sales
+    // Fields: items (array), total (number), timestamp (timestamp), userId (string)
+    //
+    // Collection: expenses
+    // Fields: description (string), amount (number), category (string), timestamp (timestamp)
+    //
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidProduct(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.price is number && data.price >= 0 &&
+             data.stock is number &&
+             data.category is string &&
+             (!('minStock' in data) || data.minStock is number);
+    }
+
+    function isValidSale(data) {
+      return data.items is list &&
+             data.total is number && data.total >= 0 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidExpense(data) {
+      return data.description is string && data.description.size() > 0 &&
+             data.amount is number && data.amount >= 0 &&
+             data.timestamp is timestamp;
+    }
+
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidProduct(request.resource.data);
+    }
+
+    match /sales/{saleId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidSale(request.resource.data);
+      allow update, delete: if false; // Sales are immutable for audit
+    }
+
+    match /expenses/{expenseId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidExpense(request.resource.data);
+    }
+  }
+}

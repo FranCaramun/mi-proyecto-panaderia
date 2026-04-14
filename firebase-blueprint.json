@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A product available in the bakery",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Product name" },
+        "price": { "type": "number", "description": "Unit price" },
+        "stock": { "type": "number", "description": "Current stock quantity" },
+        "category": { "type": "string", "description": "Category (e.g., Bread, Pastry, Healthy)" },
+        "minStock": { "type": "number", "description": "Minimum stock level for alerts" }
+      },
+      "required": ["name", "price", "stock", "category"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "A recorded sale transaction",
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "name": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" }
+            }
+          }
+        },
+        "total": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" }
+      },
+      "required": ["items", "total", "timestamp"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Business expenses",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["description", "amount", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Bakery products"
+    },
+    "/sales/{saleId}": {
+      "schema": "Sale",
+      "description": "Sales transactions"
+    },
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Business expenses"
+    }
+  }
+}
